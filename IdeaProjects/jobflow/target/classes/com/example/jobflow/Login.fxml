@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<AnchorPane id="AnchorPane" prefHeight="550.0" prefWidth="500.0" style="-fx-background-color: white"
+            stylesheets="@./MainStyle.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.jobflow.controllers.LoginController">
+
+    <styleClass>
+        <String fx:value="window-rounded"/>
+        <String fx:value="background-white"/>
+    </styleClass>
+    <Pane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+          AnchorPane.topAnchor="0.0">
+        <children>
+
+            <Button layoutX="205.0" layoutY="466.0" mnemonicParsing="false" onAction="#back" text="Back end">
+                <font>
+                    <Font name="System Bold" size="16.0"/>
+                </font>
+            </Button>
+        </children>
+    </Pane>
+    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Connexion" textAlignment="CENTER" AnchorPane.leftAnchor="180.0"
+          AnchorPane.topAnchor="20.0">
+        <font>
+            <Font name="Segoe UI" size="30.0"/>
+        </font>
+    </Text>
+    <Text layoutX="40.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Email"/>
+    <TextField fx:id="inputEmail" layoutY="130.0" prefHeight="50.0" promptText="Tapez votre email"
+               styleClass="form-control" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0"/>
+    <Text layoutX="40.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mot de passe"/>
+    <PasswordField fx:id="inputPassword" layoutY="230.0" prefHeight="50.0" promptText="Tapez votre mot de passe"
+                   styleClass="form-control" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0"/>
+    <Button layoutY="320.0" mnemonicParsing="false" onAction="#login" prefHeight="50.0" styleClass="success-button"
+            text="Connexion" textFill="WHITE" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0"/>
+    <HBox alignment="CENTER" layoutY="420.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0">
+        <Text fill="#343a40" strokeType="OUTSIDE" strokeWidth="0.0" text="Vous n'avez pas de compte ? "/>
+        <Button fx:id="btnSignup" mnemonicParsing="false" onAction="#signUp" styleClass="signup-button"
+                text="S'inscrire" textFill="#343a40">
+            <font>
+                <Font name="System Bold" size="16.0"/>
+            </font>
+        </Button>
+    </HBox>
+</AnchorPane>
