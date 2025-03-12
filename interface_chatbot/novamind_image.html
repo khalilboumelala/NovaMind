@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 400px;
+            max-width: 90%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            overflow: hidden;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e9e9e9;
+            color: black;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .chat-input button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chat-input button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="prompt" placeholder="Enter your prompt..." autocomplete="off">
+            <input type="text" id="negativePrompt" placeholder="Negative prompt (optional)" autocomplete="off">
+            <button onclick="sendMessage()" id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const prompt = document.getElementById("prompt").value.trim();
+            const negativePrompt = document.getElementById("negativePrompt").value.trim();
+            const chatBox = document.getElementById("chatBox");
+            const sendButton = document.getElementById("sendButton");
+
+            if (!prompt) {
+                alert("Please enter a prompt!");
+                return;
+            }
+
+            // Disable button to prevent multiple clicks
+            sendButton.disabled = true;
+
+            // Append User Message
+            const userMessage = document.createElement("div");
+            userMessage.classList.add("chat-bubble", "user-message");
+            userMessage.textContent = prompt;
+            chatBox.appendChild(userMessage);
+
+            // Append Bot "Generating..." Message
+            const botMessage = document.createElement("div");
+            botMessage.classList.add("chat-bubble", "bot-message");
+            botMessage.textContent = "Generating image...";
+            chatBox.appendChild(botMessage);
+
+            // Scroll to latest message
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // API Request to Gradio Stable Diffusion
+            const apiUrl = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+            const payload = {
+                "prompt": prompt,
+                "negative_prompt": negativePrompt,
+                "steps": 20,
+                "cfg_scale": 7,
+                "width": 512,
+                "height": 512,
+                "seed": -1
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch image");
+                }
+
+                const data = await response.json();
+                const imageBase64 = data.images[0];
+                const imageSrc = "data:image/png;base64," + imageBase64;
+
+                // Remove "Generating..." message
+                chatBox.removeChild(botMessage);
+
+                // Append Bot Image Message
+                const botImageMessage = document.createElement("div");
+                botImageMessage.classList.add("chat-bubble", "bot-message");
+                botImageMessage.innerHTML = `<img src="${imageSrc}" alt="Generated Image">`;
+                chatBox.appendChild(botImageMessage);
+
+                // Scroll to latest message
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+                botMessage.textContent = "Error generating image. Try again!";
+            }
+
+            // Re-enable button
+            sendButton.disabled = false;
+
+            // Clear input fields
+            document.getElementById("prompt").value = "";
+            document.getElementById("negativePrompt").value = "";
+        }
+    </script>
+
+</body>
+</html>
