@@ -126,6 +126,20 @@ body {
     /* Ensures no unwanted overlays */
 }
 
+.chat-window strong {
+    color: #050a30;
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.chat-window ul {
+    padding-left: 1.2em;
+}
+
+.chat-window p {
+    margin: 0.4em 0;
+}
+
 .chat {
     display: flex;
 }
@@ -174,7 +188,7 @@ body {
 /* Fix send button visibility */
 
 .chat-input {
-    position: absolute;
+    position: relative;
     bottom: 0;
     width: 100%;
     background: #fff;
@@ -214,6 +228,22 @@ body {
     cursor: pointer;
     background-color: #e3f2fd;
     border-radius: 8px;
+}
+
+.mode-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+.mode-toggle label {
+    cursor: pointer;
+}
+
+.mode-toggle input {
+    margin-right: 5px;
 }
 
 
