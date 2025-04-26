@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<!--
+ // WEBSITE: https://themefisher.com
+ // TWITTER: https://twitter.com/themefisher
+ // FACEBOOK: https://www.facebook.com/themefisher
+ // GITHUB: https://github.com/themefisher/
+-->
+
+<html lang="en">
+<head>
+
+  <!-- ** Basic Page Needs ** -->
+  <meta charset="utf-8">
+  <title>NovaMind</title>
+
+  <!-- ** Mobile Specific Metas ** -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Business Bootstrap Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Promodise Template v1.0">
+  
+  <!-- bootstrap.min css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/bootstrap/bootstrap.min.css')}}">
+  <!-- fontawesome css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/all.css')}}">
+  <!-- Icofont -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/icofont/icofont.css')}}">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+  
+  <!--Favicon-->
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png')}}" type="image/x-icon">
+
+</head><body data-spy="scroll" data-target="#mainNav">
+<nav class="navbar navbar-expand-lg fixed-top trans-navigation">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('home')}}">
+      <img src="{{ url_for('static', filename='images/logo.png')}}" alt="" class="img-fluid b-logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="mainNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon">
+        <i class="fa fa-bars"></i>
+      </span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="mainNav">
+      <ul class="navbar-nav ">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#!" id="navbarWelcome" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Home <i class="fas fa-chevron-down"></i>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarWelcome">
+            <li><a class="dropdown-item" href="{{ url_for('home')}}">Home-1</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('index2')}}">Home-2</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('index3')}}">Onepage</a></li>
+                    
+            <li class="dropdown dropdown-submenu dropright">
+              <a class="dropdown-item dropdown-toggle" href="#!" id="dropdown0301" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sub Menu</a>
+    
+              <ul class="dropdown-menu" aria-labelledby="dropdown0301">
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 01</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 02</a></li>
+              </ul>
+            </li>
+            <li class="dropdown dropdown-submenu dropleft">
+              <a class="dropdown-item dropdown-toggle" href="#!" id="dropdown0501" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sub Menu</a>
+    
+              <ul class="dropdown-menu" aria-labelledby="dropdown0501">
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 01</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 02</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('about')}}">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('service')}}">Service</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('pricing')}}">Pricing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('blog')}}">Blog</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('contact')}}">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!--MAIN HEADER AREA END -->
+<!--MAIN BANNER AREA START -->
+<div class="page-banner-area page-service" id="page-banner">
+  <div class="overlay dark-overlay"></div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 m-auto text-center col-sm-12 col-md-12">
+        <div class="banner-content content-padding">
+          <h1 class="text-white">Services we provide</h1>
+          <p>We offer personalized model customization, content generation (text, images, audio, video), and performance evaluation to enhance digital marketing efforts</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--MAIN HEADER AREA END -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- ** Basic Page Needs ** -->
+  <meta charset="utf-8">
+  <title>NovaMind</title>
+
+  <!-- ** Mobile Specific Metas ** -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Business Bootstrap Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Promodise Template v1.0">
+  
+  <!-- bootstrap.min css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/bootstrap/bootstrap.min.css')}}">
+  <!-- fontawesome css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/all.css')}}">
+  <!-- Icofont -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/icofont/icofont.css')}}">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+  
+  <!--Favicon-->
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png')}}" type="image/x-icon">
+
+</head><body data-spy="scroll" data-target="#mainNav">
+
+<nav class="navbar navbar-expand-lg fixed-top trans-navigation">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('home')}}">
+      <img src="{{ url_for('static', filename='images/logo.png')}}" alt="" class="img-fluid b-logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="mainNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon">
+        <i class="fa fa-bars"></i>
+      </span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="mainNav">
+      <ul class="navbar-nav ">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#!" id="navbarWelcome" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Home <i class="fas fa-chevron-down"></i>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarWelcome">
+            <li><a class="dropdown-item" href="{{ url_for('home')}}">Home-1</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('index2')}}">Home-2</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('index3')}}">Onepage</a></li>
+                    
+            <li class="dropdown dropdown-submenu dropright">
+              <a class="dropdown-item dropdown-toggle" href="#!" id="dropdown0301" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sub Menu</a>
+    
+              <ul class="dropdown-menu" aria-labelledby="dropdown0301">
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 01</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 02</a></li>
+              </ul>
+            </li>
+            <li class="dropdown dropdown-submenu dropleft">
+              <a class="dropdown-item dropdown-toggle" href="#!" id="dropdown0501" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sub Menu</a>
+    
+              <ul class="dropdown-menu" aria-labelledby="dropdown0501">
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 01</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('home')}}">Submenu 02</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('about')}}">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('service')}}">Service</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('pricing')}}">Pricing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('blog')}}">Blog</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link smoth-scroll" href="{{ url_for('contact')}}">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!--MAIN HEADER AREA END -->
+
+<!--  SERVICE BLOCK2 START  -->
+
+
+<!--  SERVICE BLOCK2 END  -->
+
+<!--  SERVICE AREA START  -->
+
+<!--  SERVICE AREA END  -->
+<!--  SERVICE PARTNER START  -->
+<section id="service-head" class="service-style-two">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-sm-12 m-auto">
+        <div class="heading text-white text-center">
+          <h4 class="section-title text-white">Full stack digital marketing solution</h4>
+          <p>We’re full service which means we’ve got you covered on  content right through to digital. You’ll form a lasting relationship with us.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--  SERVICE PARTNER END  -->
+<!--  SERVICE AREA START  -->
+<section id="service">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/007-digital-marketing-3.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>Video Marketing</h4>
+            <p>Reach a huge area of users and get a publicty of your product and service ,<span>video marketing</span>
+              solution.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box ">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/008-digital-marketing-2.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>Chatbots</h4>
+            <p>Chatbots are an effective solution to engage a broad audience eager to interact with your services.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/003-task.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>SEO optimization</h4>
+            <p>we provide wide range of<span> seo service</span> to make your site at top to reach your target customers
+              provided.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/010-digital-marketing.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>Custom Website</h4>
+            <p>We provide <span>custom website</span> for any small business web based service in large compact
+              package.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/006-analytics.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>Content Growth</h4>
+            <p>Content is king,Having a blog site and want to <span>build content</span> make a platform of earning too
+              we assist you.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-6 col-md-6">
+        <div class="service-box">
+          <div class="service-img-icon">
+            <img src="{{ url_for('static', filename='images/icon/004-hiring.png')}}" alt="service-icon" class="img-fluid">
+          </div>
+          <div class="service-inner">
+            <h4>Link Building </h4>
+            <p>Want to grow your <span>potential visitor</span> your site to make it more effective and succesful
+              business .</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--  SERVICE AREA END  -->
+<!--  PARTNER START  -->
+<section id="clients" class="section-padding ">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="mb-5">
+          <h3 class="mb-2">Building Trust for the Future</h3>
+          <p>We are excited to introduce a few of our valued clients who have joined us on this journey, each bringing unique insights and collaboration to our mission</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-3 col-sm-6 col-md-3 text-center">
+        <img src="{{ url_for('static', filename='images/clients/client01.png')}}" alt="partner" class="img-fluid">
+      </div>
+      <div class="col-lg-3 col-sm-6 col-md-3 text-center">
+        <img src="{{ url_for('static', filename='images/clients/client06.png')}}" alt="partner" class="img-fluid">
+      </div>
+      <div class="col-lg-3 col-sm-6 col-md-3 text-center">
+        <img src="{{ url_for('static', filename='images/clients/client04.png')}}" alt="partner" class="img-fluid">
+      </div>
+      <div class="col-lg-3 col-sm-6 col-md-3 text-center">
+        <img src="{{ url_for('static', filename='images/clients/client05.png')}}" alt="partner" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</section>
+<!--  PARTNER END  -->
+
+
+<!--  FOOTER AREA START  -->
+<section id="footer" class="section-padding">
+  <div class="container">
+    <div class="row justify-content-around">
+      <div class="col-lg-4">
+        <div class="footer-widget footer-link">
+          <h4>We concern about you<br> to grow business rapidly.</h4>
+          <p>At NovaMind, we are committed to helping you grow your business rapidly. We understand the challenges you face, and we strive to provide solutions that drive efficiency and growth.</p>
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="footer-widget footer-link">
+          <h4>About</h4>
+          <ul>
+            <li><a href="{{ url_for('about')}}">About</a></li>
+            <li><a href="{{ url_for('service')}}">Service</a></li>
+            <li><a href="{{ url_for('pricing')}}">Pricing</a></li>
+            <li><a href="#!">Team</a></li>
+            <li><a href="#!">Testimonials</a></li>
+            <li><a href="{{ url_for('blog')}}">Blog</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="footer-widget footer-link">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#!">How it Works</a></li>
+            <li><a href="#!">Support</a></li>
+            <li><a href="#!">Privacy Policy</a></li>
+            <li><a href="#!">Report Bug</a></li>
+            <li><a href="#!">License</a></li>
+            <li><a href="#!">Terms & Condition</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-4 col-sm-12">
+        <div class="footer-widget footer-text">
+          <h4>Our location</h4>
+          <p class="mail"><span>Mail:</span> NovaMind@esprit.tn</p>
+          <p><span>Phone :</span>+216--------</p>
+          <p><span>Location:</span> Ariana Soghra</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <div class="footer-copy">
+           <a href="https://themefisher.com/">NovaMind</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--  FOOTER AREA END  -->
+
+   
+
+    <!-- 
+    Essential Scripts
+    =====================================-->
+
+    
+    <!-- Main jQuery -->
+    <script src="{{ url_for('static', filename='plugins/jquery/jquery.min.js')}}"></script>
+    <!-- Bootstrap css -->
+    <script src="{{ url_for('static', filename='plugins/bootstrap/bootstrap.min.js')}}"></script>
+
+    <!-- Google Map -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcABaamniA6OL5YvYSpB3pFMNrXwXnLwU"></script>
+    <script src="{{ url_for('static', filename='plugins/google-map/map.js')}}"></script>
+
+    <!-- main script -->
+    <script src="{{ url_for('static', filename='js/script.js')}}"></script>
+
+  </body>
+  </html>
+   
