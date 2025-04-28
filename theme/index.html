@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NovaMind Guide</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="dist/jquery.convform.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="demo.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chat-container {
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            width: 300px;
+            transition: transform 0.3s ease;
+            transform: translateY(100%);
+        }
+        .chat-container.open {
+            transform: translateY(0);
+        }
+        .chat-button {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <button class="chat-button" id="chatToggle">💬</button>
+    <div class="chat-container" id="chatContainer">
+        <div class="card no-border">
+            <h1>Welcome to NovaMind!</h1>
+            <div id="chat" class="conv-form-wrapper">
+                <form action="" method="GET" class="hidden">
+                    <select data-conv-question="Are you interested in our services?" name="first-question">
+                        <option value="yes">Yes, tell me more!</option>
+                        <option value="no">Not right now.</option>
+                    </select>
+                    <input type="text" name="name" data-conv-question="Great! Can I have your name, please?" required placeholder="Your Name">
+                    <select name="businessType" data-conv-question="What type of small business do you represent?" required>
+                        <option value="food">Food</option>
+                        <option value="cosmetics">Cosmetics</option>
+                        <option value="technology">Technology</option>
+                        <option value="services">Professional Services</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select name="service" data-conv-question="Which services are you interested in? (Select all that apply)" multiple required>
+                        <option value="Video Marketing">Video Marketing</option>
+                        <option value="Email Marketing">Email Marketing</option>
+                        <option value="SEO Optimization">SEO Optimization</option>
+                        <option value="Custom Website">Custom Website</option>
+                    </select>
+                    <select name="experience" data-conv-question="Have you used digital marketing services before?" required>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                    <input type="text" data-conv-question="What challenges are you facing in your marketing?" data-no-answer="true" placeholder="Describe your challenges">
+                    <input type="text" name="projectUrgency" data-conv-question="How soon are you looking to start?" required placeholder="e.g., Immediately, within a month">
+                    <select data-conv-question="Would you like to learn about our paid offers for additional benefits?" name="paidOffers">
+                        <option value="yes">Yes, I want to know more!</option>
+                        <option value="no">No, thank you.</option>
+                    </select>
+                    <select data-conv-question="Would you like to schedule a consultation?" name="scheduleConsultation">
+                        <option value="yes">Yes, please!</option>
+                        <option value="no">No, thank you.</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="jquery-1.12.3.min.js"></script>
+    <script type="text/javascript" src="dist/autosize.min.js"></script>
+    <script type="text/javascript" src="dist/jquery.convform.js"></script>
+    <script>
+        jQuery(function($){
+            var convForm = $('#chat').convform({selectInputStyle: 'disable'});
+            $('#chatToggle').click(function() {
+                $('#chatContainer').toggleClass('open');
+            });
+        });
+    </script>
+</body>
+</html>

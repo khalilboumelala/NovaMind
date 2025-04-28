@@ -199,9 +199,11 @@ body {
     align-items: center;
 }
 
-.chat-input textarea {
+.prompt textarea {
     height: 55px;
-    width: 100%;
+    min-width: 300px;
+    max-width: 100%;
+    transition: width 0.3s ease;
     max-height: 180px;
     border: none;
     outline: none;
@@ -210,7 +212,7 @@ body {
     padding: 16px 15px 16px 0;
 }
 
-.chat-input textarea:valid~span {
+.prompt textarea:valid~span {
     visibility: visible;
 }
 
@@ -263,4 +265,15 @@ body {
     .chatbot header span {
         display: block;
     }
+}
+.AI-Input {
+    position: relative; /* s'assure que les éléments enfants sont bien positionnés */
+    z-index: 1; /* assure que c'est au bon niveau */
+}
+
+.AI-Input input,
+.AI-Input textarea,
+.AI-Input button,
+.AI-Input label {
+    pointer-events: auto; /* Permet de cliquer et écrire */
 }

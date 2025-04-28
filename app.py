@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
 from flask_mysqldb import MySQL
 from flask_cors import CORS
-import time
 import requests
 import json
+from functools import wraps
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -11,12 +11,37 @@ app.config.from_pyfile('config.py')
 mysql = MySQL(app)
 CORS(app)
 
-# Utilisation du backend chatbot existant
-def login_required():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+# Backend settings
+OLLAMA_URL = "http://localhost:11434/api/generate"
+IMAGE_GEN_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img"
+NEGATIVE_PROMPTS = {
+    "product_shoes": "blurry, text, watermark, distorted legs, logo",
+    "product_clothes": "low resolution, logo, text, messy background",
+    "default": "text, blur, watermark, ugly, distorted",
+}
 
-# === ROUTES UTILISATEUR ===
+# ===== Fonctions Utilitaires =====
+
+def is_logged_in():
+    return 'username' in session
+
+def get_current_user_id():
+    return session.get('user_id')
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_logged_in():
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def generate_conversation_title(user_input):
+    words = user_input.strip().split()[:10]
+    return ' '.join(words) if words else "Nouvelle Conversation"
+
+# ===== Routes Pages de Base =====
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -54,57 +79,9 @@ def service():
     return render_template('service.html')
 
 @app.route('/home')
+@login_required
 def home():
-    if 'username' in session:
-        return render_template('home.html', username=session['username'])
-    else:
-        return redirect(url_for('login'))
-
-@app.route('/chatbot', methods=['GET', 'POST'])
-def chatbot():
-    if 'user_id' in session:
-        # Récupérer ou créer un thread de conversation pour l'utilisateur
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT id FROM conversation_threads WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (session['user_id'],))
-        thread = cur.fetchone()
-
-        if not thread:
-            # Créer un nouveau thread si l'utilisateur n'a pas de thread en cours
-            cur.execute("INSERT INTO conversation_threads (user_id) VALUES (%s)", (session['user_id'],))
-            mysql.connection.commit()
-            cur.execute("SELECT id FROM conversation_threads WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (session['user_id'],))
-            thread = cur.fetchone()
-
-        thread_id = thread['id']
-
-        # Récupérer les messages du thread
-        cur.execute("SELECT sender, message FROM messages WHERE thread_id = %s ORDER BY created_at", (thread_id,))
-        history = cur.fetchall()
-        cur.close()
-
-        return render_template('chatbot.html', user_id=session['user_id'], history=history, thread_id=thread_id)
-    else:
-        return redirect(url_for('login'))
-
-
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    if 'user_id' in session:
-        message = request.form['message']
-        thread_id = request.form['thread_id']
-
-        # Sauvegarder le message dans la base de données
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO messages (thread_id, sender, message) VALUES (%s, %s, %s)", (thread_id, 'user', message))
-        mysql.connection.commit()
-        cur.close()
-
-        # Rediriger vers le chatbot pour afficher l'historique mis à jour
-        return redirect(url_for('chatbot'))
-    else:
-        return redirect(url_for('login'))
-
-
+    return render_template('home.html', username=session['username'])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -112,11 +89,12 @@ def login():
         username = request.form['username']
         pwd = request.form['password']
         cur = mysql.connection.cursor()
-        cur.execute("SELECT username, password FROM user WHERE username = %s", (username,))
+        cur.execute("SELECT id, username, password FROM user WHERE username = %s", (username,))
         user = cur.fetchone()
         cur.close()
-        if user and pwd == user[1]:
-            session['username'] = user[0]
+        if user and pwd == user[2]:
+            session['user_id'] = user[0]
+            session['username'] = user[1]
             return redirect(url_for('home'))
         else:
             return render_template('login.html', error='Identifiants invalides')
@@ -137,22 +115,75 @@ def register():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('user_id', None)
     return redirect(url_for('login'))
 
-# === BACKEND CHATBOT EXISTANT ===
-OLLAMA_URL = "http://localhost:11434/api/generate"
-IMAGE_GEN_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img"
-NEGATIVE_PROMPTS = {
-    "product_shoes": "blurry, text, watermark, distorted legs, logo",
-    "product_clothes": "low resolution, logo, text, messy background",
-    "default": "text, blur, watermark, ugly, distorted",
-}
+# ===== Routes Gestion Chatbot =====
+
+@app.route('/start_conversation', methods=['POST'])
+@login_required
+def start_conversation():
+    user_id = get_current_user_id()
+
+    # Try to get message safely
+    user_input = request.form.get('message', None)
+
+    title = "New Conversation"
+    
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO conversation_threads (user_id, title) VALUES (%s, %s)", (user_id, title))
+    mysql.connection.commit()
+    thread_id = cur.lastrowid
+
+    # Only insert a message if there is one
+    if user_input:
+        cur.execute("INSERT INTO messages (thread_id, user_id, role, message) VALUES (%s, %s, %s, %s)", 
+                    (thread_id, user_id, 'user', user_input))
+        mysql.connection.commit()
+
+    cur.close()
+
+    return redirect(url_for('chatbot', thread_id=thread_id))
+
+
+@app.route('/send_message/<int:thread_id>', methods=['POST'])
+@login_required
+def send_message(thread_id):
+    user_input = request.form['message']
+    user_id = get_current_user_id()
+
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO messages (thread_id, user_id, role, message) VALUES (%s, %s, %s, %s)",
+                (thread_id, user_id, 'user', user_input))
+    mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('chatbot', thread_id=thread_id))
+
+@app.route('/chatbot', defaults={'thread_id': None})
+@app.route('/chatbot/<int:thread_id>')
+@login_required
+def chatbot(thread_id):
+    user_id = get_current_user_id()
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, title FROM conversation_threads WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    threads = cur.fetchall()
+
+    messages = []
+    if thread_id:
+        cur.execute("SELECT role, message FROM messages WHERE thread_id = %s ORDER BY created_at ASC", (thread_id,))
+        messages = cur.fetchall()
+    
+    cur.close()
+
+    return render_template('chatbot.html', username=session['username'], threads=threads, messages=messages, thread_id=thread_id)
+
+# ===== Backend Streaming Texte & Génération Image =====
 
 @app.route('/stream_text')
+@login_required
 def stream_text():
-    auth = login_required()
-    if auth: return auth
-
     user_input = request.args.get("prompt", "")
 
     def generate():
@@ -186,10 +217,8 @@ def stream_text():
     return Response(generate(), content_type='text/event-stream')
 
 @app.route("/generate_step", methods=["POST"])
+@login_required
 def generate_step():
-    auth = login_required()
-    if auth: return auth
-
     data = request.get_json()
     user_input = data.get("prompt", "")
     step = data.get("step", "")
@@ -209,7 +238,6 @@ def generate_step():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 def generate_image_prompt(user_input):
     prompt = (
         f"Based on this marketing idea:\n\n"
@@ -224,10 +252,8 @@ def generate_image_prompt(user_input):
     })
     return response.json()["response"].strip()
 
-
 def get_negative_prompt(context_type="default"):
     return NEGATIVE_PROMPTS.get(context_type, NEGATIVE_PROMPTS["default"])
-
 
 def generate_image(prompt, negative_prompt=""):
     image_prompt = generate_image_prompt(prompt)
@@ -244,6 +270,8 @@ def generate_image(prompt, negative_prompt=""):
     }
     res = requests.post(IMAGE_GEN_URL, json=payload)
     return res.json()["images"][0]
+
+# ===== Lancement App =====
 
 if __name__ == '__main__':
     app.secret_key = 'your_secret_key'
