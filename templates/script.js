@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         promptField.value = "";
 
         // STEP 1: STREAMED TEXT GENERATION
-        const eventSource = new EventSource(`http://127.0.0.1:5001/stream_text?prompt=${encodeURIComponent(promptValue)}`);
+        const eventSource = new EventSource(`http://127.0.0.1:5000/stream_text?prompt=${encodeURIComponent(promptValue)}`);
 
 
         let firstChunk = true;
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mode === "image-only") {
             // Just generate image
             const negPrompt = getNegativePrompt("default");
-            const imageRes = await fetch("http://127.0.0.1:5001/generate_step", {
+            const imageRes = await fetch("http://127.0.0.1:5000/generate_step", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pTag.appendChild(negMsg);
         animateDots(negMsg); // animate dots only on the new line
 
-        const negRes = await fetch("http://127.0.0.1:5001/generate_step", {
+        const negRes = await fetch("http://127.0.0.1:5000/generate_step", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: promptValue, step: "negative" })
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pTag.appendChild(imgMsg);
         animateDots(imgMsg);
 
-        const imageRes = await fetch("http://127.0.0.1:5001/generate_step", {
+        const imageRes = await fetch("http://127.0.0.1:5000/generate_step", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append('prompt', prompt); // Send the specific image prompt
 
             try {
-                const response = await fetch('http://127.0.0.1:5001/generate_video', {
+                const response = await fetch('http://127.0.0.1:5000/generate_video', {
                     method: 'POST',
                     body: formData
                 });

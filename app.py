@@ -1,24 +1,34 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
+import MySQLdb
 from flask_mysqldb import MySQL
 from flask_cors import CORS
 import requests
 import json
 from functools import wraps
-
+import pymysql
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-
-mysql = MySQL(app)
+print("MYSQL_HOST:", app.config.get('MYSQL_HOST'))
+print("MYSQL_DB:  ", app.config.get('MYSQL_DB'))
+mysql = MySQL()             # no app yet
+app.config.from_pyfile('config.py')
+mysql.init_app(app)         # bind after config
 CORS(app)
 
-# Backend settings
-OLLAMA_URL = "http://localhost:11434/api/generate"
-IMAGE_GEN_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img"
-NEGATIVE_PROMPTS = {
-    "product_shoes": "blurry, text, watermark, distorted legs, logo",
-    "product_clothes": "low resolution, logo, text, messy background",
-    "default": "text, blur, watermark, ugly, distorted",
+
+db_config = {
+    'host':     app.config['MYSQL_HOST'],
+    'user':     app.config['MYSQL_USER'],
+    'password': app.config['MYSQL_PASSWORD'],
+    'db':       app.config['MYSQL_DB'],
+   # 'port':     app.config.get('MYSQL_PORT', 3306)
 }
+conn = pymysql.connect(**db_config)
+cur = conn.cursor()
+
+print("Connected!", conn)
+
+# Backend settings
 
 # ===== Fonctions Utilitaires =====
 
@@ -88,7 +98,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         pwd = request.form['password']
-        cur = mysql.connection.cursor()
+ #       cur = mysql.connection.cursor()
         cur.execute("SELECT id, username, password FROM user WHERE username = %s", (username,))
         user = cur.fetchone()
         cur.close()
@@ -105,7 +115,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         pwd = request.form['password']
-        cur = mysql.connection.cursor()
+#        cur = mysql.connection.cursor()
         cur.execute("INSERT INTO user (username, password) VALUES (%s, %s)", (username, pwd))
         mysql.connection.commit()
         cur.close()
@@ -163,7 +173,7 @@ def send_message(thread_id):
 @app.route('/chatbot', defaults={'thread_id': None})
 @app.route('/chatbot/<int:thread_id>')
 @login_required
-def chatbot(thread_id):
+def chatbot(thread_id=None):
     user_id = get_current_user_id()
 
     cur = mysql.connection.cursor()
@@ -179,97 +189,14 @@ def chatbot(thread_id):
 
     return render_template('chatbot.html', username=session['username'], threads=threads, messages=messages, thread_id=thread_id)
 
+
+@app.route('/chatbotguest')
+@login_required
+def chatbotguest(thread_id=None):
+   
+    return render_template('chatbotinterface.html')
+
 # ===== Backend Streaming Texte & Génération Image =====
-
-@app.route('/stream_text')
-@login_required
-def stream_text():
-    user_input = request.args.get("prompt", "")
-
-    def generate():
-        prompt = (
-            f"You are a social media expert. Create a well-formatted Markdown post for the idea:\n"
-            f"{user_input}\n\n"
-            f"✅ Format it with Markdown.\n"
-            f"✅ Add a line break after every heading or bold title.\n"
-            f"✅ Put each feature (bullet) on its own line using '-', '*', or '•'.\n"
-            f"✅ Add empty lines between major sections.\n"
-            f"✅ Do NOT place text directly after bold titles without a break.\n"
-            f"✅ Hashtags should appear in their own line at the end."
-        )
-
-        payload = {
-            "model": "llama3",
-            "prompt": prompt,
-            "stream": True
-        }
-        with requests.post(OLLAMA_URL, json=payload, stream=True) as r:
-            for line in r.iter_lines(decode_unicode=True):
-                if line.strip():
-                    try:
-                        line_data = json.loads(line)
-                        token = line_data.get("response", "")
-                        yield f"data: {token}\n\n"
-                    except Exception as e:
-                        print("⚠️ JSON decode error:", e)
-            yield "data: [DONE]\n\n"
-
-    return Response(generate(), content_type='text/event-stream')
-
-@app.route("/generate_step", methods=["POST"])
-@login_required
-def generate_step():
-    data = request.get_json()
-    user_input = data.get("prompt", "")
-    step = data.get("step", "")
-
-    try:
-        if step == "negative":
-            prompt = get_negative_prompt("default")
-            return jsonify({"status": "generating_negative", "negative": prompt})
-
-        elif step == "image":
-            prompt = data.get("prompt_text", "")
-            negative = data.get("negative_prompt", "")
-            image = generate_image(prompt, negative)
-            return jsonify({"status": "generating_image", "image": image})
-        else:
-            return jsonify({"error": "Invalid step"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-def generate_image_prompt(user_input):
-    prompt = (
-        f"Based on this marketing idea:\n\n"
-        f"{user_input}\n\n"
-        f"Generate a short, vivid image generation prompt suitable for a text-to-image model. "
-        f"Describe what the image should show, avoiding any textual or caption elements."
-    )
-    response = requests.post(OLLAMA_URL, json={
-        "model": "llama3",
-        "prompt": prompt,
-        "stream": False
-    })
-    return response.json()["response"].strip()
-
-def get_negative_prompt(context_type="default"):
-    return NEGATIVE_PROMPTS.get(context_type, NEGATIVE_PROMPTS["default"])
-
-def generate_image(prompt, negative_prompt=""):
-    image_prompt = generate_image_prompt(prompt)
-    full_negative = negative_prompt + ", text, watermark, label, caption, subtitles, logo, words"
-
-    payload = {
-        "prompt": image_prompt,
-        "negative_prompt": full_negative,
-        "steps": 20,
-        "cfg_scale": 7,
-        "width": 512,
-        "height": 512,
-        "seed": -1
-    }
-    res = requests.post(IMAGE_GEN_URL, json=payload)
-    return res.json()["images"][0]
 
 # ===== Lancement App =====
 
