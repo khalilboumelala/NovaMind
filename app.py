@@ -98,7 +98,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         pwd = request.form['password']
- #       cur = mysql.connection.cursor()
+        cur = conn.cursor()
         cur.execute("SELECT id, username, password FROM user WHERE username = %s", (username,))
         user = cur.fetchone()
         cur.close()
@@ -115,9 +115,9 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         pwd = request.form['password']
-#        cur = mysql.connection.cursor()
+        cur = conn.cursor()
         cur.execute("INSERT INTO user (username, password) VALUES (%s, %s)", (username, pwd))
-        mysql.connection.commit()
+        conn.commit()
         cur.close()
         return redirect(url_for('login'))
     return render_template('register.html')
@@ -140,9 +140,9 @@ def start_conversation():
 
     title = "New Conversation"
     
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("INSERT INTO conversation_threads (user_id, title) VALUES (%s, %s)", (user_id, title))
-    mysql.connection.commit()
+    conn.commit()
     thread_id = cur.lastrowid
 
     # Only insert a message if there is one
@@ -162,10 +162,10 @@ def send_message(thread_id):
     user_input = request.form['message']
     user_id = get_current_user_id()
 
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("INSERT INTO messages (thread_id, user_id, role, message) VALUES (%s, %s, %s, %s)",
                 (thread_id, user_id, 'user', user_input))
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
 
     return redirect(url_for('chatbot', thread_id=thread_id))
@@ -176,7 +176,7 @@ def send_message(thread_id):
 def chatbot(thread_id=None):
     user_id = get_current_user_id()
 
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT id, title FROM conversation_threads WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
     threads = cur.fetchall()
 
