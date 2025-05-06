@@ -247,6 +247,38 @@ body {
 }
 
 
+/* style.css */
+
+.chat-input .mode-toggle {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input .mode-toggle label {
+    margin: 0;
+}
+
+.chat video {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.generate-video-btn {
+    margin-top: 5px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.generate-video-btn:hover {
+    background-color: #45a049;
+}
+
+
 /* Media query to utilize 100% of the viewport on smaller screen sizes */
 
 @media(max-width: 490px) {

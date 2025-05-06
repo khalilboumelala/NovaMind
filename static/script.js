@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         promptField.value = "";
 
         // STEP 1: STREAMED TEXT GENERATION
-        const eventSource = new EventSource(`http://127.0.0.1:5001/stream_text?prompt=${encodeURIComponent(promptValue)}`);
+        const eventSource = new EventSource(`http://127.0.0.1:5000/stream_text?prompt=${encodeURIComponent(promptValue)}`);
 
 
         let firstChunk = true;

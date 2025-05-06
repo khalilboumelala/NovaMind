@@ -130,7 +130,7 @@ def logout():
 
 # ===== Routes Gestion Chatbot =====
 
-@app.route('/start_conversation', methods=['POST'])
+@app.route('/start_conversation', methods=['POST','GET'])
 @login_required
 def start_conversation():
     user_id = get_current_user_id()
@@ -152,8 +152,9 @@ def start_conversation():
         mysql.connection.commit()
 
     cur.close()
+    print("Redirecting to chatbotintegration with thread_id:", thread_id)
 
-    return redirect(url_for('chatbot', thread_id=thread_id))
+    return redirect(url_for('chatbotintegration', thread_id=thread_id))
 
 
 @app.route('/send_message/<int:thread_id>', methods=['POST'])
@@ -168,7 +169,29 @@ def send_message(thread_id):
     conn.commit()
     cur.close()
 
-    return redirect(url_for('chatbot', thread_id=thread_id))
+    return redirect(url_for('chatbotintegration', thread_id=thread_id))
+
+
+@app.route('/chatbotintegration', defaults={'thread_id': None})
+@app.route('/chatbotintegration/<int:thread_id>')
+@login_required
+def chatbotintegration(thread_id=None):
+    user_id = get_current_user_id()
+
+    cur = conn.cursor()
+    cur.execute("SELECT id, title FROM conversation_threads WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    threads = cur.fetchall()
+
+    messages = []
+    if thread_id:
+        cur.execute("SELECT role, message FROM messages WHERE thread_id = %s ORDER BY created_at ASC", (thread_id,))
+        messages = cur.fetchall()
+    
+    cur.close()
+
+    return render_template('chatbotintegration.html', username=session['username'], threads=threads, messages=messages, thread_id=thread_id)
+
+
 
 @app.route('/chatbot', defaults={'thread_id': None})
 @app.route('/chatbot/<int:thread_id>')
@@ -193,7 +216,6 @@ def chatbot(thread_id=None):
 @app.route('/chatbotguest')
 @login_required
 def chatbotguest(thread_id=None):
-   
     return render_template('chatbotinterface.html')
 
 # ===== Backend Streaming Texte & Génération Image =====

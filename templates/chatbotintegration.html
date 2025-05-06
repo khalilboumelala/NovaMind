@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaMind Chat Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+</head>
+
+<body>
+    <div class="chatbot">
+        <div class="chatbot-sidebar">
+            <h3>Conversation History</h3>
+            <form action="{{ url_for('start_conversation') }}" method="POST" style="margin-bottom: 15px;">
+                <button type="submit" class="new-conversation-btn">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+            </form>
+            <ul id="conversation-history">
+                {% for thread in threads %}
+                <li>
+                    <a href="{{ url_for('chatbot', thread_id=thread[0]) }}">{{ thread[1] }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="chatbot-main">
+            <header>
+                <h2>NovaMind</h2>
+                <a href="{{ url_for('home') }}" class="close-btn material-symbols-outlined">close</a>
+            </header>
+            <ul class="chat-window" id="chat-window">
+                {% for message in messages %}
+                <li class="chat {% if message[0] == 'user' %}outgoing-chat{% else %}incoming-chat{% endif %}">
+                    <span class="material-symbols-outlined">
+                            {% if message[0] == 'user' %}person{% else %}support_agent{% endif %}
+                        </span>
+                    <p>{{ message[1] }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="chat-input">
+                {% if thread_id is none %}
+                    <form action="{{ url_for('start_conversation') }}" method="POST">
+                        <textarea name="message" id="prompt" placeholder="Start your conversation..." required></textarea>
+                        <button type="submit" id="send-btn" class="material-symbols-outlined">send</button>
+                    </form>
+                {% else %}
+                    <form id="chat-form" action="{{ url_for('send_message', thread_id=thread_id) }}" method="POST" enctype="multipart/form-data">
+                        <div class="input-actions">
+                            <textarea id="prompt" name="message" placeholder="Type your message here..." required></textarea>
+                            <div class="action-buttons">
+                                <button type="button" id="voice-btn" class="material-symbols-outlined">mic</button>
+                                <label for="file-upload" class="material-symbols-outlined upload-label">attach_file</label>
+                                <input type="file" id="file-upload" name="file" style="display: none;">
+                                <button type="submit" id="send-btn" class="material-symbols-outlined">send</button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+                <div class="mode-toggle">
+                    <label><input type="radio" name="mode" value="text-image" checked> Text + Image</label>
+                    <label><input type="radio" name="mode" value="text-only"> Text Only</label>
+                    <label><input type="radio" name="mode" value="image-only"> Image Only</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='scriptintegration.js') }}" defer></script>
+   
+</body>
+
+</html>
