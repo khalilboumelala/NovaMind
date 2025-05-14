@@ -6,6 +6,11 @@ import requests
 import json
 from functools import wraps
 import pymysql
+import os
+import time
+
+
+'''
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 print("MYSQL_HOST:", app.config.get('MYSQL_HOST'))
@@ -13,8 +18,9 @@ print("MYSQL_DB:  ", app.config.get('MYSQL_DB'))
 mysql = MySQL()             # no app yet
 app.config.from_pyfile('config.py')
 mysql.init_app(app)         # bind after config
-CORS(app)
 
+
+CORS(app)
 
 db_config = {
     'host':     app.config['MYSQL_HOST'],
@@ -25,6 +31,51 @@ db_config = {
 }
 conn = pymysql.connect(**db_config)
 cur = conn.cursor()
+'''
+
+# Debug environment variables
+print("Environment variables:", os.environ)
+
+app = Flask(__name__)
+app.config.from_pyfile('config.py')
+print("Config after loading:", app.config)
+
+# Manually set config if not loaded
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'mysql')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'username')  # Match your .env
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'password')  # Match your .env
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'novamind')
+
+print("Updated Config:", app.config)
+
+mysql = MySQL()
+mysql.init_app(app)
+CORS(app)
+
+db_config = {
+    'host': app.config['MYSQL_HOST'],
+    'user': app.config['MYSQL_USER'],
+    'password': app.config['MYSQL_PASSWORD'],
+    'db': app.config['MYSQL_DB'],
+}
+
+print("db_config:", db_config)
+# Add retry logic for database connection
+max_retries = 5
+retry_interval = 5  # seconds
+for attempt in range(max_retries):
+    try:
+        conn = pymysql.connect(**db_config)
+        cur = conn.cursor()
+        print("Connected to MySQL!", conn)
+        break
+    except pymysql.err.OperationalError as e:
+        if attempt < max_retries - 1:
+            print(f"Failed to connect to MySQL: {e}. Retrying in {retry_interval} seconds...")
+            time.sleep(retry_interval)
+        else:
+            print(f"Failed to connect to MySQL after {max_retries} attempts: {e}")
+            raise
 
 print("Connected!", conn)
 
@@ -224,4 +275,4 @@ def chatbotguest(thread_id=None):
 
 if __name__ == '__main__':
     app.secret_key = 'your_secret_key'
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

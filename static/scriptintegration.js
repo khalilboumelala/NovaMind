@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    let isSubmitting = false;
+
     if (startConversationForm) {
         startConversationForm.addEventListener('submit', (event) => {
             console.log('Start conversation form submitted.');
@@ -35,14 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (chatForm) {
         chatForm.addEventListener('submit', async (event) => {
-            console.log('Chat form submitted! Event listener triggered.');
             event.preventDefault();
-            console.log('Raw textarea value before trim:', chatInput.value); // Debug log
-            // Force update the value and check again
+            if (isSubmitting) {
+                console.log('Submission already in progress. Ignoring duplicate submission.');
+                return;
+            }
+            isSubmitting = true;
+            console.log('Chat form submitted! Event listener triggered.');
+
+            console.log('Raw textarea value before trim:', chatInput.value);
             const rawValue = chatInput.value;
             console.log('Forced raw value:', rawValue);
             const userMessage = rawValue.trim();
-            console.log('Trimmed user message:', userMessage); // Debug log
+            console.log('Trimmed user message:', userMessage);
             const mode = document.querySelector('input[name="mode"]:checked')?.value || 'text-only';
             console.log('Selected mode:', mode);
 
@@ -53,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorChat.innerHTML = `<span class="material-symbols-outlined">support_agent</span><p>Please enter a message to send.</p>`;
                 chatWindow.appendChild(errorChat);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
+                isSubmitting = false;
                 return;
             }
 
@@ -63,11 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
             chatWindow.scrollTop = chatWindow.scrollHeight;
             console.log('User message displayed in chat window.');
 
+            chatInput.value = '';
+
             let threadId = chatForm.getAttribute('action').match(/send_message\/(\d+)/)?.[1];
             console.log('Extracted threadId:', threadId);
             if (!threadId) {
                 console.error('Thread ID not found in form action. Redirecting to start a new conversation.');
                 window.location.href = '/start_conversation';
+                isSubmitting = false;
                 return;
             }
 
@@ -101,8 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             console.log('Streaming complete. EventSource closed.');
                             if (mode === 'text-image' || mode === 'image-only') {
                                 console.log('Proceeding to image generation.');
-                                handleNextSteps(userMessage, pTag, mode);
+                                handleNextSteps(userMessage, pTag, mode, chatWindow); // Pass chatWindow as a parameter
                             }
+                            isSubmitting = false;
                         }
                         return;
                     }
@@ -124,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('EventSource error occurred.');
                     eventSource.close();
                     pTag.textContent = "⚠️ Failed to generate response.";
+                    isSubmitting = false;
                 };
             } catch (error) {
                 console.error('Error sending message:', error);
@@ -131,11 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorChat.classList.add('chat', 'incoming-chat');
                 errorChat.innerHTML = `<span class="material-symbols-outlined">support_agent</span><p>Error: ${error.message}</p>`;
                 chatWindow.appendChild(errorChat);
+                isSubmitting = false;
             }
         });
 
         sendBtn.addEventListener('click', (event) => {
             console.log('Send button clicked directly.');
+            if (isSubmitting) return;
             chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
         });
 
@@ -143,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.key === "Enter" && !event.shiftKey) {
                 console.log('Enter key pressed in textarea.');
                 event.preventDefault();
+                if (isSubmitting) return;
                 chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
             }
         });
@@ -151,114 +167,173 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function handleNextSteps(promptValue, pTag, mode) {
-    if (mode === "image-only") {
-        const negPrompt = "text, blur, watermark, ugly, distorted";
+async function handleNextSteps(promptValue, pTag, mode, chatWindow) { // Add chatWindow as a parameter
+    try {
+        if (mode === "image-only") {
+            const negPrompt = "text, blur, watermark, ugly, distorted";
+            console.log('Fetching image for image-only mode with payload:', {
+                step: "image",
+                prompt_text: promptValue,
+                negative_prompt: negPrompt
+            });
+            const imageRes = await fetch("http://127.0.0.1:5000/generate_step", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    step: "image",
+                    prompt_text: promptValue,
+                    negative_prompt: negPrompt
+                })
+            });
+
+            console.log('Image fetch response status:', imageRes.status);
+            if (!imageRes.ok) {
+                throw new Error(`Image fetch failed with status: ${imageRes.status}`);
+            }
+
+            const imageData = await imageRes.json();
+            console.log('Image data received for image-only mode:', imageData);
+
+            if (!imageData.image) {
+                throw new Error('No image data in response');
+            }
+
+            renderPreviewCard(null, imageData.image, chatWindow); // Pass chatWindow to renderPreviewCard
+            return;
+        }
+
+        if (mode === "text-only") {
+            return;
+        }
+
+        const negMsg = document.createElement("div");
+        negMsg.textContent = "🙈 Generating image generation prompt";
+        pTag.appendChild(negMsg);
+        animateDots(negMsg);
+
+        console.log('Fetching negative prompt with payload:', { prompt: promptValue, step: "negative" });
+        const negRes = await fetch("http://127.0.0.1:5000/generate_step", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: promptValue, step: "negative" })
+        });
+
+        console.log('Negative prompt fetch response status:', negRes.status);
+        if (!negRes.ok) {
+            throw new Error(`Negative prompt fetch failed with status: ${negRes.status}`);
+        }
+
+        const negData = await negRes.json();
+        console.log('Negative prompt data:', negData);
+
+        if (!negData.negative) {
+            throw new Error('No negative prompt in response');
+        }
+
+        const negativePrompt = negData.negative;
+
+        const imgMsg = document.createElement("div");
+        imgMsg.textContent = "🎨 Generating image";
+        pTag.appendChild(imgMsg);
+        animateDots(imgMsg);
+
+        console.log('Fetching image with payload:', {
+            step: "image",
+            prompt_text: promptValue,
+            negative_prompt: negativePrompt
+        });
         const imageRes = await fetch("http://127.0.0.1:5000/generate_step", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 step: "image",
                 prompt_text: promptValue,
-                negative_prompt: negPrompt
+                negative_prompt: negativePrompt
             })
         });
-        const imageData = await imageRes.json();
-        renderPreviewCard(null, imageData.image);
-        return;
-    }
 
-    if (mode === "text-only") {
-        return;
-    }
-
-    const negMsg = document.createElement("div");
-    negMsg.textContent = "🙈 Generating image generation prompt";
-    pTag.appendChild(negMsg);
-    animateDots(negMsg);
-
-    const negRes = await fetch("http://127.0.0.1:5000/generate_step", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: promptValue, step: "negative" })
-    });
-    const negData = await negRes.json();
-    const negativePrompt = negData.negative;
-
-    const imgMsg = document.createElement("div");
-    imgMsg.textContent = "🎨 Generating image";
-    pTag.appendChild(imgMsg);
-    animateDots(imgMsg);
-
-    const imageRes = await fetch("http://127.0.0.1:5000/generate_step", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            step: "image",
-            prompt_text: promptValue,
-            negative_prompt: negativePrompt
-        })
-    });
-    const imageData = await imageRes.json();
-
-    const imageBubble = document.createElement("li");
-    imageBubble.classList.add("chat", "incoming-chat");
-    imageBubble.dataset.prompt = imageData.image_prompt;
-    imageBubble.innerHTML = `
-        <span class="material-symbols-outlined">support_agent</span>
-        <p>
-            <img src="data:image/png;base64,${imageData.image}" alt="Generated Image" style="max-width: 100%; border-radius: 12px;">
-            <button class="generate-video-btn">Generate Video</button>
-        </p>
-    `;
-    chatWindow.appendChild(imageBubble);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-    stopAnimatingDots();
-
-    imageBubble.querySelector('.generate-video-btn').addEventListener('click', async () => {
-        const imgElement = imageBubble.querySelector('img');
-        const base64String = imgElement.src.split(',')[1];
-        const prompt = imageBubble.dataset.prompt;
-
-        const loadingBubble = document.createElement('li');
-        loadingBubble.classList.add('chat', 'incoming-chat');
-        loadingBubble.innerHTML = `
-            <span class="material-symbols-outlined">support_agent</span>
-            <p>🎥 Generating video...</p>
-        `;
-        chatWindow.appendChild(loadingBubble);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        const byteCharacters = atob(base64String);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        console.log('Image fetch response status:', imageRes.status);
+        if (!imageRes.ok) {
+            throw new Error(`Image fetch failed with status: ${imageRes.status}`);
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
 
-        const formData = new FormData();
-        formData.append('image', blob, 'image.png');
-        formData.append('prompt', prompt);
+        const imageData = await imageRes.json();
+        console.log('Image data received:', imageData);
 
-        try {
-            const response = await fetch('http://127.0.0.1:5000/generate_video', {
-                method: 'POST',
-                body: formData
-            });
-            if (!response.ok) throw new Error('Failed to generate video');
-            const videoBlob = await response.blob();
-            const videoUrl = URL.createObjectURL(videoBlob);
+        if (!imageData.image) {
+            throw new Error('No image data in response');
+        }
+
+        const imageBubble = document.createElement("li");
+        imageBubble.classList.add("chat", "incoming-chat");
+        imageBubble.dataset.prompt = imageData.image_prompt;
+        imageBubble.innerHTML = `
+            <span class="material-symbols-outlined">support_agent</span>
+            <p>
+                <img src="data:image/png;base64,${imageData.image}" alt="Generated Image" style="max-width: 100%; border-radius: 12px;">
+                <button class="generate-video-btn">Generate Video</button>
+            </p>
+        `;
+        chatWindow.appendChild(imageBubble);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        console.log('Image bubble added to chat window.');
+        stopAnimatingDots();
+    } catch (error) {
+        console.error('Error in handleNextSteps:', error);
+        const errorMsg = document.createElement("div");
+        errorMsg.textContent = `⚠️ Failed to generate image: ${error.message}`;
+        pTag.appendChild(errorMsg);
+        stopAnimatingDots();
+    }
+
+    // Add the event listener for the "Generate Video" button outside the try-catch to ensure it’s added even if an error occurs
+    const imageBubble = chatWindow.querySelector('.chat:last-child');
+    if (imageBubble && imageBubble.querySelector('.generate-video-btn')) {
+        imageBubble.querySelector('.generate-video-btn').addEventListener('click', async () => {
+            const imgElement = imageBubble.querySelector('img');
+            const base64String = imgElement.src.split(',')[1];
+            const prompt = imageBubble.dataset.prompt;
+
+            const loadingBubble = document.createElement('li');
+            loadingBubble.classList.add('chat', 'incoming-chat');
             loadingBubble.innerHTML = `
                 <span class="material-symbols-outlined">support_agent</span>
-                <p><video src="${videoUrl}" controls style="max-width: 100%; border-radius: 12px;"></video></p>
+                <p>🎥 Generating video...</p>
             `;
+            chatWindow.appendChild(loadingBubble);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-        } catch (error) {
-            loadingBubble.querySelector('p').textContent = '⚠️ Failed to generate video.';
-            console.error('Error:', error);
-        }
-    });
+
+            const byteCharacters = atob(base64String);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/png' });
+
+            const formData = new FormData();
+            formData.append('image', blob, 'image.png');
+            formData.append('prompt', prompt);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/generate_video', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) throw new Error('Failed to generate video');
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+                loadingBubble.innerHTML = `
+                    <span class="material-symbols-outlined">support_agent</span>
+                    <p><video src="${videoUrl}" controls style="max-width: 100%; border-radius: 12px;"></video></p>
+                `;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            } catch (error) {
+                loadingBubble.querySelector('p').textContent = '⚠️ Failed to generate video.';
+                console.error('Error:', error);
+            }
+        });
+    }
 }
 
 function animateDots(element) {
@@ -288,7 +363,8 @@ function stopAnimatingDots() {
     clearInterval(window.dotInterval);
 }
 
-function renderPreviewCard(markdownText = null, imageBase64 = null) {
+function renderPreviewCard(markdownText = null, imageBase64 = null, chatWindow) { // Add chatWindow as a parameter
+    console.log('renderPreviewCard called with:', { markdownText, imageBase64 });
     const card = document.createElement("div");
     card.classList.add("card");
 
@@ -298,6 +374,7 @@ function renderPreviewCard(markdownText = null, imageBase64 = null) {
         image.style.backgroundImage = `url(data:image/png;base64,${imageBase64})`;
         image.style.backgroundSize = "cover";
         card.appendChild(image);
+        console.log('Image added to preview card.');
     }
 
     const category = document.createElement("div");
@@ -326,4 +403,5 @@ function renderPreviewCard(markdownText = null, imageBase64 = null) {
     cardWrapper.appendChild(card);
     chatWindow.appendChild(cardWrapper);
     chatWindow.scrollTop = chatWindow.scrollHeight;
+    console.log('Preview card appended to chat window.');
 }
