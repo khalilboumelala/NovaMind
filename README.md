@@ -1,34 +1,57 @@
-# NovaMind
 
-Welcome to **NovaMind**, a web-based application built with Flask that provides a chatbot interface, user authentication, and database management using MySQL. This project facilitates interactive conversations and user management, with a focus on ease of setup and scalability.
+# NovaMind & LLM/Multimodal AI Suite
+
+Welcome to **NovaMind**, a powerful web app suite with two main components:
+
+- A **Flask-based chatbot app** with user authentication and MySQL database integration.  
+- A high-end **LLM + Stable Diffusion + AnimateDiff pipeline backend** for text streaming, fine-tuning, image generation, and video generation.
+
+This repository serves as a monorepo or multi-branch project for all these features.
 
 ---
 
 ## 🚀 Features
 
-- **User Authentication** – Register and login functionality with session management  
-- **Chatbot Integration** – Start and manage conversation threads with a dynamic chatbot interface  
-- **Database Management** – Store user data, conversation threads, and messages in a MySQL database  
-- **Responsive Design** – HTML templates ensure a user-friendly experience across devices  
+### NovaMind Chatbot Web App
+
+- User registration and login with secure session management  
+- Interactive chatbot interface with conversation threads  
+- Persistent data storage using MySQL  
+- Responsive HTML/CSS frontend templates  
+
+### LLM & Multimodal AI Backend
+
+- Streaming text generation from LLaMA 3 model using OLLAMA API  
+- Fine-tuning notebooks for LLaMA 3 and Stable Diffusion models (see `notebooks/`)  
+- Text-to-image generation using Stable Diffusion API  
+- Video generation via AnimateDiff pipeline and MotionAdapter  
+- Advanced negative prompt handling for image quality control  
+- REST API routes for real-time streaming and multimedia generation  
 
 ---
 
 ## 🛠️ Technologies Used
 
-- **Python** – Core programming language  
-- **Flask** – Web framework  
-- **MySQL** – Relational database for persistent storage  
-- **HTML/CSS** – Frontend templates and styling  
-- **PyMySQL** – Python library for MySQL connectivity  
+- Python 3.9+  
+- Flask (Web framework)  
+- MySQL (Database for chatbot app)  
+- PyMySQL (MySQL connector)  
+- Requests (HTTP client)  
+- Torch, Diffusers (for Stable Diffusion and AnimateDiff pipelines)  
+- PIL (Image processing)  
+- ImageIO (Video encoding)  
+- Flask-CORS (Cross-Origin Resource Sharing)  
 
 ---
 
 ## 📦 Prerequisites
 
 - Python 3.9 or higher  
-- MySQL Server installed and running  
-- Git  
-- `pip` (Python package manager)  
+- MySQL Server installed and running (for chatbot app)  
+- CUDA-enabled GPU (for AI pipelines)  
+- OLLAMA LLaMA 3 local server running on port 11434  
+- Stable Diffusion API running locally on port 7860 (e.g. AUTOMATIC1111 web UI)  
+- Git and `pip` package manager  
 
 ---
 
@@ -41,130 +64,60 @@ git clone https://github.com/yourusername/NovaMind.git
 cd NovaMind
 ```
 
-### 2. Set Up a Virtual Environment
+### 2. Set Up Python Environment
 
 ```bash
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is not available, generate it with:
+### 3. Configure MySQL Database (For Chatbot App)
+
+- Ensure MySQL server is running.
+- Create a database and user with appropriate permissions.
+- Update your Flask app config with database credentials.
+
+### 4. Run Flask Apps
+
+Run the chatbot app (default port 5000):
 
 ```bash
-pip freeze > requirements.txt
+export FLASK_APP=chatbot_app.py
+flask run
 ```
 
-### 4. Configure MySQL
+Run the LLM & multimodal AI backend (default port 5001):
 
-- Install MySQL Community Server and start the service.  
-- Create a database named `novamind`:
-
-```sql
-mysql -u root
-CREATE DATABASE novamind;
-```
-
-- Import schema from `init.sql` (if available):
-
-```sql
-USE novamind;
-SOURCE path/to/init.sql;
-```
-
-Ensure the MySQL root user is configured with an empty password, or update the credentials in `config.py`.
-
----
-
-### 5. Configure the Application
-
-Update `config.py` with your settings:
-
-```python
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = ''
-MYSQL_DB = 'novamind'
-SECRET_KEY = 'your_secret_key'  # Or use environment variables
+```bash
+python llm_multimodal_app.py
 ```
 
 ---
 
-### 6. Run the Application
+## 🧪 Usage
 
-```bash
-python app.py
-```
-
-Visit [http://127.0.0.1:5000](http://127.0.0.1:5000)
+- Access the chatbot interface at `http://localhost:5000`
+- Use API endpoints of the LLM backend at `http://localhost:5001`
 
 ---
 
-## 🧑‍💻 Usage
+## 📂 Notebooks
 
-- **Register:** Visit `/register` to create a new user account  
-- **Login:** Go to `/login` to access your dashboard  
-- **Start Chat:** Navigate to `/start_conversation` to begin  
-- **Chatbot:** Use `/chatbotintegration` or `/chatbot` to interact with the chatbot  
-
----
-
-## 🛠️ MySQL Root with Empty Password (Optional)
-
-If MySQL requires a password but you'd like to use root without one:
-
-1. Stop the MySQL service:
-
-```bash
-net stop mysql
-```
-
-2. Start MySQL in safe mode:
-
-```bash
-mysqld --skip-grant-tables
-```
-
-3. Connect and update root credentials:
-
-```sql
-mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-4. Restart MySQL:
-
-```bash
-net start mysql
-```
+- `notebooks/llama3_finetune.ipynb` — Fine-tuning LLaMA 3 model  
+- `notebooks/stable_diffusion_finetune.ipynb` — Fine-tuning Stable Diffusion model  
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome!  
-Feel free to fork this repository, open issues, or submit pull requests to improve NovaMind.
+Feel free to submit issues or pull requests. Contributions are welcome!
 
 ---
 
-## 📄 License
+## 📜 License
 
-This project is licensed under the **MIT License** – see the `LICENSE` file for details.
+MIT License
 
----
 
-## 📝 Notes
-
-- Replace `yourusername` in the clone URL with your GitHub username.  
-- Make sure the `LICENSE` file exists and is properly referenced.  
-- After committing this README, verify that it displays correctly on GitHub.
+````
