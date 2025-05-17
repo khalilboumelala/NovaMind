@@ -41,10 +41,5 @@ git clone https://github.com/yourusername/NovaMind.git
 cd NovaMind
 
 
-###  2. Set Up a Virtual Environment
 
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
+
