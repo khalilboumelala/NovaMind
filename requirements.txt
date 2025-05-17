@@ -1,0 +1,9 @@
+diffusers==0.33.1
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
+xformers==0.0.27.post2
+accelerate==1.6.0
+imageio==2.37.0
+ffmpeg-python==0.2.0
+numpy==1.26.4
+pillow==10.4.0

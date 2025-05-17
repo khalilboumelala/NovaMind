@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function handleNextSteps(promptValue, pTag, mode) {
         // STEP 2: GENERATE NEGATIVE PROMPT
         // Preserve previous HTML
+
         if (mode === "image-only") {
             // Just generate image
             const negPrompt = getNegativePrompt("default");
@@ -120,20 +121,74 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const imageData = await imageRes.json();
 
-        // Create a new image bubble
+        // Store the image and its specific prompt
         const imageBubble = document.createElement("li");
         imageBubble.classList.add("chat", "incoming-chat");
+        imageBubble.dataset.prompt = imageData.image_prompt; // Store the specific image prompt
         imageBubble.innerHTML = `
-  <span class="material-symbols-outlined">support_agent</span>
-  <p><img src="data:image/png;base64,${imageData.image}" alt="Generated Image" style="max-width: 100%; border-radius: 12px;"></p>
-`;
+            <span class="material-symbols-outlined">support_agent</span>
+            <p>
+                <img src="data:image/png;base64,${imageData.image}" alt="Generated Image" style="max-width: 100%; border-radius: 12px;">
+                <button class="generate-video-btn">Generate Video</button>
+            </p>
+        `;
         chatWindow.appendChild(imageBubble);
         chatWindow.scrollTop = chatWindow.scrollHeight;
         stopAnimatingDots();
 
-        // if (mode === "text-image") {
-        //renderPreviewCard(pTag.dataset.rawText, imageData.image);
-        // }
+        // Add event listener for the "Generate Video" button
+        imageBubble.querySelector('.generate-video-btn').addEventListener('click', async() => {
+            const imgElement = imageBubble.querySelector('img');
+            const base64String = imgElement.src.split(',')[1];
+            const prompt = imageBubble.dataset.prompt; // Retrieve the specific image prompt
+
+            // Show loading message
+            const loadingBubble = document.createElement('li');
+            loadingBubble.classList.add('chat', 'incoming-chat');
+            loadingBubble.innerHTML = `
+                <span class="material-symbols-outlined">support_agent</span>
+                <p>🎥 Generating video...</p>
+            `;
+            chatWindow.appendChild(loadingBubble);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // Convert base64 to Blob
+            const byteCharacters = atob(base64String);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/png' });
+
+            // Prepare FormData with image and specific prompt
+            const formData = new FormData();
+            formData.append('image', blob, 'image.png');
+            formData.append('prompt', prompt); // Send the specific image prompt
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/generate_video', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to generate video');
+                }
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                // Display video
+                loadingBubble.innerHTML = `
+                    <span class="material-symbols-outlined">support_agent</span>
+                    <p><video src="${videoUrl}" controls style="max-width: 100%; border-radius: 12px;"></video></p>
+                `;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            } catch (error) {
+                loadingBubble.querySelector('p').textContent = '⚠️ Failed to generate video.';
+                console.error('Error:', error);
+            }
+        });
     }
 
     // Dot Animation
