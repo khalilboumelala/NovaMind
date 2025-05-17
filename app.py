@@ -33,24 +33,24 @@ conn = pymysql.connect(**db_config)
 cur = conn.cursor()
 '''
 
+
 # Debug environment variables
 print("Environment variables:", os.environ)
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_pyfile('config.py')
 print("Config after loading:", app.config)
 
 # Manually set config if not loaded
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'mysql')
-app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'username')  # Match your .env
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'password')  # Match your .env
+# Manually set config if not loaded
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')  # Explicitly set to empty string
 app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'novamind')
-
-print("Updated Config:", app.config)
-
 mysql = MySQL()
 mysql.init_app(app)
-CORS(app)
+
 
 db_config = {
     'host': app.config['MYSQL_HOST'],
@@ -106,6 +106,7 @@ def generate_conversation_title(user_input):
 @app.route('/')
 def index():
     return render_template('index.html')
+    
 
 @app.route('/home2')
 def index2():
