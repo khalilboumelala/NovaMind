@@ -44,9 +44,9 @@ print("Config after loading:", app.config)
 
 # Manually set config if not loaded
 # Manually set config if not loaded
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'mysql')
 app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')  # Explicitly set to empty string
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'rootroot')  # Explicitly set to empty string
 app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'novamind')
 mysql = MySQL()
 mysql.init_app(app)
